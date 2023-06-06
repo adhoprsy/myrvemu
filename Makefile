@@ -1,4 +1,4 @@
-CFLAGS=-O3 -Wall -Werror -Wimplicit-fallthrough
+CFLAGS=-O3 -Wall -Werror -Wimplicit-fallthrough -Wno-unused-variable
 SRCS=$(wildcard src/*.c)
 HDRS=$(wildcard src/*.h)
 OBJS=$(patsubst src/%.c, obj/%.o, $(SRCS))

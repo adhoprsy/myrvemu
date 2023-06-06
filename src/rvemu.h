@@ -19,13 +19,27 @@
 #define fatalf(fmt, ...) (fprintf(stderr, "\033[;41mfatal\033[0m: %s:%d " fmt "\n", __FILE__, __LINE__, __VA_ARGS__), exit(1))
 #define fatal(msg) fatalf("%s", msg)
 
+#define ROUNDDOWN(x, k) ((x) & -(k))  //binary round down
+#define ROUNDUP(x, k) (((x) + (k)-1) & -(k))
+#define MIN(x, y) ((x) > (y) ? (y) : (x))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+
+#define GUEST_MEMORY_OFFSET 0x088800000000ULL
+
+#define TO_HOST(addr)  (addr + GUEST_MEMORY_OFFSET)
+#define TO_GUEST(addr) (addr - GUEST_MEMORY_OFFSET)
 
 /*
  * mmu.c
  * memory manage unit
+ * using a LINEAR mmu, easy to implement and fast
+ * mmap, no need for additional permission check
 */
 typedef struct {
    u64 entry;
+   u64 host_alloc;
+   u64 alloc;       // guest
+   u64 base;        // guest
 }mmu_t;
 
 void mmu_load_elf(mmu_t *, int);
