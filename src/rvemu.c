@@ -11,6 +11,11 @@ int main(int argc, char *argv[]) {
   printf("host alloc: %lx\n", machine.mmu.host_alloc);
   printf("running prog entry: %llx \n", TO_HOST(machine.mmu.entry));
   
+  while (true) {
+    enum exit_reason_t reason = machine_step(&machine);
+    assert(reason == ecall);
+    
+  }
 
   return 0;
 
