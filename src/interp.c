@@ -5,10 +5,18 @@
 
 #include "rvemu.h"
 
+static void func_empty(state_t *state, insn_t *insn) {}
+
 typedef void (func_t)(state_t *, insn_t *);
 
-// func <---> instru
-static func_t* funcs[] = {};
+// func <---> instru, 1 to 1
+// a array of many function pointers, each one for an implementation of an
+// instruction.
+// total 133 instruction types, so array size should be 133, 
+static func_t* funcs[] = {
+
+  
+};
 
 // execute a block by interpreting
 void exec_block_interp(state_t *state) {
@@ -17,8 +25,11 @@ void exec_block_interp(state_t *state) {
   while (true) {
     u32 data = *(u32 *) TO_HOST(state->pc);
     insn_decode(&insn, data);
-
+    
+    //printf("type:%d  data:%d\n", insn.type, data);
+    
     funcs[insn.type](state, &insn);
+    
     // if zero is changed
     state->gp_regs[zero] = 0;
 
