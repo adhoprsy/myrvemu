@@ -104,10 +104,19 @@ enum exit_reason_t {
   indirect_branch,
   ecall,          // syscall
 };
+
+enum csr_t {
+    fflags = 0x001,
+    frm    = 0x002,
+    fcsr   = 0x003,
+};
+
 typedef struct {
   enum exit_reason_t exit_reason;
-  u64 gp_regs[32];
-  u64 pc;  //pc -> first instru before run
+  u64 reenter_pc; //
+  u64 gp_regs[num_gp_regs];
+  fp_reg_t fp_regs[num_fp_regs];
+  u64 pc;  // pc -> first instru before run
 }state_t;
 
 

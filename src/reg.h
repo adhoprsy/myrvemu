@@ -11,6 +11,7 @@ enum gp_reg_type_t {
     num_gp_regs,
 };
 
+// float point
 enum fp_reg_type_t {
     ft0, ft1, ft2, ft3, ft4, ft5, ft6, ft7,
     fs0, fs1,
@@ -21,8 +22,8 @@ enum fp_reg_type_t {
 };
 
 typedef union {
-    u64 v;
-    u32 w;
-    f64 d;
-    f32 f;
+    u64 v; // value
+    u32 w; // low 32bits as u32
+    f64 d; // see as double
+    f32 f; // see as float 
 } fp_reg_t;
