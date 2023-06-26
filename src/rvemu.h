@@ -31,6 +31,7 @@
 #define TO_HOST(addr)  (addr + GUEST_MEMORY_OFFSET)
 #define TO_GUEST(addr) (addr - GUEST_MEMORY_OFFSET)
 
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
 
 /*
  * instructions
@@ -92,7 +93,10 @@ typedef struct {
 }mmu_t;
 
 void mmu_load_elf(mmu_t *, int);
-
+u64 mmu_alloc(mmu_t *, i64);
+inline void mmu_write(u64 addr, u8 *data, size_t len) {
+  memcpy((void *)TO_HOST(addr), (void *)data, len);
+}
 
 /*
  * state.c
@@ -129,9 +133,19 @@ typedef struct {
   mmu_t mmu;
 }machine_t;
 
+inline u64 machine_get_gp_reg(machine_t *m, i32 reg) {
+  assert(reg >=0 && reg < num_gp_regs);
+  return m->state.gp_regs[reg];
+}
+inline void machine_set_gp_reg(machine_t *m, i32 reg, u64 data) {
+  assert(reg >=0 && reg < num_gp_regs);
+  m->state.gp_regs[reg] = data;
+}
+
+
 void machine_load_program(machine_t *, char *);
 enum exit_reason_t machine_step(machine_t *);
-
+void machine_setup(machine_t *, int, char **);
 
 /*
  * interp.c
@@ -145,3 +159,9 @@ void exec_block_interp(state_t *);
  * bitcode decode into instructions
 */
 void insn_decode(insn_t *, u32);
+
+/**
+ * syscall.c
+*/
+
+u64 do_syscall(machine_t *, u64);

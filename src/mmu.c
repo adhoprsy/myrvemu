@@ -66,10 +66,10 @@ static void mmu_load_segment(mmu_t *mmu,
     assert(addr == aligned_vaddr + ROUNDUP(filesz, page_size));
   }
 
-  // host:  [    ELF   |  mem alloced while running   |]
-  //                   | <- host_alloc
-
-  // guest:            | <- base                      | <- alloc
+  // host:  [    ELF   ][  stack  ][|  mem alloced while running   |]
+  //                                  | <- host_alloc
+  //                              | sp
+  // guest:             | <- base      | <- alloc
   mmu->host_alloc = MAX(mmu->host_alloc, (aligned_vaddr + ROUNDUP(memsz, page_size)));
   
   mmu->base = mmu->alloc = TO_GUEST(mmu->host_alloc); 
@@ -110,3 +110,40 @@ void mmu_load_elf(mmu_t *mmu,
   }
 
 }
+
+// stack 32M
+//  |top
+// [               | argc argv envp auxv]
+//                 ^ stack bottom(initial sp)
+
+
+u64 mmu_alloc(mmu_t *mmu, 
+                i64 sz) { // i64: can be neg, to free mem
+  int page_size = getpagesize();
+  u64 base = mmu->alloc;
+  assert(base >= mmu->base);
+
+  mmu->alloc += sz;
+  assert(mmu->alloc >= mmu->base);
+  // implement with mmap, host_alloc always aligns to page_size
+  // if there are remaining spaces, we don't have to alloc a new page
+  if (sz > 0 && mmu->alloc > TO_GUEST(mmu->host_alloc)) {
+    if (mmap((void *)mmu->host_alloc, ROUNDUP(sz, page_size),
+        PROT_READ | PROT_WRITE,
+        MAP_ANONYMOUS | MAP_PRIVATE, -1, 0) == MAP_FAILED)
+      fatal("alloc mmap failed");
+    mmu->host_alloc += ROUNDUP(sz, page_size);
+  }
+  // free more than one page
+  else if (sz < 0 && ROUNDUP(mmu->alloc, page_size) < TO_GUEST(mmu->host_alloc)) {
+    u64 len = TO_GUEST(mmu->host_alloc) - ROUNDUP(mmu->alloc, page_size);
+    
+    if (munmap((void *)ROUNDUP(mmu->alloc, page_size), len) == -1) 
+      fatal(strerror(errno));
+
+    mmu->host_alloc -= len;
+  }
+
+  return base; // guest space addr
+}
+
