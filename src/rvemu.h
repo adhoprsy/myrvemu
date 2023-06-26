@@ -113,7 +113,7 @@ enum csr_t {
 
 typedef struct {
   enum exit_reason_t exit_reason;
-  u64 reenter_pc; //
+  u64 reenter_pc; // pc of the begining of a new block after a branch
   u64 gp_regs[num_gp_regs];
   fp_reg_t fp_regs[num_fp_regs];
   u64 pc;  // pc -> first instru before run

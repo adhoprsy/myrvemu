@@ -169,6 +169,9 @@ static void func_ecall(state_t *state, insn_t *insn) {
 }
 
 // csr
+// only recognize usermode csr
+// have to skip them due to didn't use softfloat
+// TODO:
 #define FUNC() \
   switch (insn->csr) { \
     case fflags: \
@@ -190,7 +193,7 @@ static void func_csrrci(state_t *state, insn_t *insn) { FUNC(); }
 
 static void func_flw(state_t *state, insn_t *insn) {
   u64 addr = state->gp_regs[insn->rs1] + (i64) insn->imm;
-  state->fp_regs[insn->rd].v = *(u32 *)TO_HOST(addr) | ((u64)(-1 << 32));
+  state->fp_regs[insn->rd].v = *(u32 *)TO_HOST(addr) | ((u64)-1 << 32);
 }
 static void func_fld(state_t *state, insn_t *insn) {
   u64 addr = state->gp_regs[insn->rs1] + (i64) insn->imm;
@@ -204,7 +207,7 @@ static void func_fld(state_t *state, insn_t *insn) {
 
 static void func_fsw(state_t *state, insn_t *insn) { FUNC(u32); }
 static void func_fsd(state_t *state, insn_t *insn) { FUNC(u64); }
-#undef func
+#undef FUNC
 
 // !! TODO:
 // use riscV float arith library (berkley-softfloat-3)
