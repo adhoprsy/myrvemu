@@ -6,11 +6,11 @@ int main(int argc, char *argv[]) {
   machine_load_program(&machine, argv[1]);
   machine_setup(&machine, argc, argv);
 
-  printf("machine address: 0x%lx\n", (u64)&machine);
+  // printf("machine address: 0x%lx\n", (u64)&machine);
 
-  printf("loaded elf entry: %lx\n", machine.mmu.entry);
-  printf("host alloc: %lx\n", machine.mmu.host_alloc);
-  printf("running prog entry: %llx \n", TO_HOST(machine.mmu.entry));
+  // printf("loaded elf entry: %lx\n", machine.mmu.entry);
+  // printf("host alloc: %lx\n", machine.mmu.host_alloc);
+  // printf("running prog entry: %llx \n", TO_HOST(machine.mmu.entry));
   
   while (true) {
     enum exit_reason_t reason = machine_step(&machine);
